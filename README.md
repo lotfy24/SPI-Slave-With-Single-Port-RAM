@@ -32,17 +32,16 @@ The SPI Slave interface uses a finite state machine with the following states:
 
 ## Repository Structure
 
-lotfy24-spi-slave-with-single-port-ram/
-├── README.md
-├── Design/
-│ ├── mem.dat # RAM initialization file (hex format)
-│ ├── Ram.v # Single port synchronous RAM module
-│ ├── SPI_Slave.v # SPI Slave protocol FSM and interface
-│ └── SPI_Wrapper.v # Top-level module integrating SPI interface and RAM
-└── Test_Bench/
-├── Constraints_basys3.xdc # FPGA constraints file
-├── run.do # Simulation run script
-└── SPI_tb.v # Testbench for SPI Slave and RAM verification
+| Path | Description |
+|------|-------------|
+| **README.md** | Project overview and usage instructions |
+| **Design/mem.dat** | RAM initialization file in hex format |
+| **Design/Ram.v** | Single-port synchronous RAM module |
+| **Design/SPI_Slave.v** | SPI Slave protocol FSM and interface |
+| **Design/SPI_Wrapper.v** | Top-level module integrating SPI interface and RAM |
+| **Test_Bench/Constraints_basys3.xdc** | FPGA constraints file for Basys 3 |
+| **Test_Bench/run.do** | Simulation run script |
+| **Test_Bench/SPI_tb.v** | Testbench for SPI Slave and RAM verification |
 
 ---
 

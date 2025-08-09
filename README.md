@@ -1,102 +1,95 @@
-# SPI-Slave-With-Single-Port-RAM
+SPI Slave with Single Port RAM
 Project Overview
-This project implements an SPI Slave device with integrated single-port synchronous RAM, designed for FPGA or ASIC platforms. The SPI Slave interface communicates with an SPI Master using a custom protocol, while the RAM module allows data storage and retrieval.
-
-The system enables commands from the SPI master to write to or read from the internal RAM, providing a flexible memory-mapped SPI slave solution.
-Modules Description
-1. SPI_slave_interface.v
-Implements the SPI slave protocol as a finite state machine (FSM) with states for command checking, writing data, reading address, and reading data.
-
-Handles SPI signals: MOSI (Master Out Slave In), MISO (Master In Slave Out), and SS_n (Slave Select, active low).
-
-Interfaces with external data and control signals (tx_valid, tx_data, rx_valid, rx_data) for communication with the RAM module.
-
-2. Single_port_SYNC_RAM.v
-A synchronous single-port RAM module with parameterizable depth (default 256 words) and address size (8 bits).
-
-Supports separate write and read address registers controlled by the SPI slave.
-
-Writes or reads data based on commands received from SPI.
-
-Signals tx_valid to indicate data ready to send back via SPI.
-
-3. SPI_Wrapper.v
-Top-level module that instantiates the SPI Slave interface and the RAM module.
-
-Connects the SPI interface signals to the RAM module signals, managing data flow.
-
-4. SPI_Wrapper_tb.v
-Testbench module that validates SPI Slave and RAM functionality.
-
-Simulates SPI write and read operations by sending 10-bit data packets with commands and data.
-
-Initializes RAM contents from a hex file (mem.dat).
-
-Checks for correctness of written and read data by comparing SPI interface data with RAM contents.
-
-Uses clock, reset, and SPI signals to drive the DUT (Device Under Test) and monitor outputs.
-
-SPI Protocol and Operation
-SPI communication starts when SS_n goes low.
-
-Commands and data are sent over MOSI; data to be sent back is shifted out on MISO.
-
-The first two bits of each received 10-bit data word define the command type:
-
-00: Set write address in RAM
-
-01: Write data to RAM at the stored write address
-
-10: Set read address in RAM
-
-11: Read data from RAM at the stored read address and send back via SPI
-
-The SPI slave FSM transitions through states to handle these operations, interfacing with the RAM module accordingly.
+Welcome to the SPI Slave with Single Port RAM project — a digital design that implements an SPI Slave device integrated with a synchronous single-port RAM using Verilog. This project facilitates communication between an SPI Master and internal RAM through standard SPI protocol commands.
 
 Features
-Full SPI Slave implementation with 10-bit wide data packets.
+SPI Slave interface supporting MOSI, MISO, SS_n (active low), clock, and reset signals
 
-Single-port synchronous RAM for flexible data storage.
+Internal synchronous RAM with 256-byte depth and 8-bit wide data
 
-Clear FSM design with distinct states for command, write, and read.
+Finite State Machine (FSM) to handle SPI read/write commands and data flow
 
-Parameterizable memory depth and address width.
+Parameterized memory size and address width for flexibility
 
-Modular and easy to integrate design.
+Supports write commands, read address reception, and data transmission
 
-Comprehensive testbench to validate SPI and RAM functionality.
+Robust reset and idle state management for reliable operation
 
+Testbench included for functional verification
+
+FSM States
+The SPI Slave interface uses a finite state machine with the following states:
+
+IDLE — Waits for SPI communication to start (SS_n high)
+
+CHK_CMD — Checks the command bit to determine the operation type
+
+WRITE — Receives 10-bit write data (address + data) to store in RAM
+
+READ_ADD — Receives 10-bit read address from the SPI Master
+
+READ_DATA — Sends data stored at the specified RAM address back to the Master
+
+Repository Structure
+graphql
+Copy
+Edit
+├── SPI_Wrapper.v             # Top-level module integrating SPI interface and RAM
+├── SPI_slave_interface.v     # SPI protocol FSM handling SPI commands and data
+├── Single_port_SYNC_RAM.v    # Synchronous single-port RAM module
+├── SPI_Wrapper_tb.v          # Testbench for SPI Slave and RAM verification
+├── mem.dat                   # RAM initialization file (hex format) for simulation
 Usage
-Top-Level Integration:
+Integration:
+Connect your SPI Master signals to the SPI Slave ports:
 
-Use the SPI_Wrapper module as your top-level design.
+MOSI — Master Out Slave In data line
 
-Connect SPI signals (MOSI, MISO, SS_n), clock (clk), and reset (rst_n) as needed.
+MISO — Master In Slave Out data line
+
+SS_n — Slave Select (active low)
+
+clk — System clock
+
+rst_n — Active low reset
+
+Memory Configuration:
+Adjust the parameters MEM_DEPTH and ADDR_SIZE to fit your memory size needs (default 256 bytes, 8-bit address).
+
+Write Operation:
+
+Master sends a write command (command bits = 00) followed by 8-bit address and 8-bit data in a 10-bit frame.
+
+The SPI Slave stores the data at the specified address in RAM.
+
+Read Operation:
+
+Master sends a read address command (command bits = 10 for address, then 11 for data read).
+
+The SPI Slave outputs the data stored at that address via MISO during the read data state.
 
 Simulation:
 
-Use SPI_Wrapper_tb.v to simulate the design.
+Use the provided SPI_Wrapper_tb.v testbench to simulate SPI transactions and verify read/write correctness.
 
-Initialize RAM contents using mem.dat file.
+Initialize RAM with mem.dat file to preload memory before simulation.
 
-Run the testbench to verify SPI write and read commands.
+Simulation
+The SPI_Wrapper_tb.v testbench performs thorough verification by:
 
-Monitor outputs and internal signals for debugging.
+Initializing RAM from mem.dat
 
-Synthesis:
+Sending SPI write commands with address and data pairs
 
-The design is synthesizable for FPGA or ASIC targets.
+Sending SPI read commands with address and validating MISO output
 
-Customize parameters like MEM_DEPTH and ADDR_SIZE as required.
+Checking internal signals for correctness
 
-Files
-SPI_slave_interface.v — SPI slave interface module.
+Reporting errors and halting on mismatch
 
-Single_port_SYNC_RAM.v — Synchronous single-port RAM module.
+Run the testbench in your simulator and observe outputs and waveforms to validate functionality.
 
-SPI_Wrapper.v — Top-level module connecting SPI slave and RAM.
+Parameters
+MEM_DEPTH (default: 256): RAM size in bytes
 
-SPI_Wrapper_tb.v — Testbench module to simulate and verify functionality.
-
-mem.dat — Hex file to initialize RAM contents during simulation.
-
+ADDR_SIZE (default: 8): Width of RAM address bus

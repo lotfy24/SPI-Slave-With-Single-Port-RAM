@@ -44,10 +44,6 @@ lotfy24-spi-slave-with-single-port-ram/
 ├── run.do # Simulation run script
 └── SPI_tb.v # Testbench for SPI Slave and RAM verification
 
-yaml
-Copy
-Edit
-
 ---
 
 ## Usage

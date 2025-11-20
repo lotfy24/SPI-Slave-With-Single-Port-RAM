@@ -28,72 +28,77 @@ initial begin
    data =0;
    @(negedge clk_tb);
    rst_n_tb = 1;
-   // TEST WRITE OPERATION
-   for(i=0;i<49;i=i+1)begin
-    // START COMMUNICATION 
-        SS_n_tb = 0;
-        MOSI_tb = 0;
-        repeat(2) @(negedge clk_tb);
-        if(flag == 0)begin
-          data[9:8] = 0;
-          flag = 1;
-        end
-        else begin
-           data [9:8] = 1;
-           flag = 0;
-        end
-         
-        for(j=0;j<=1;j=j+1)begin
-          MOSI_tb = data[9-j];
-          @(negedge clk_tb);
-        end
-        data[7:0] = $random;
+   // WRITE ADDRESS
+   SS_n_tb = 0; // START COMMUNICATION
+   MOSI_tb = 0;
+   data[9:8] = 2'b00; 
+   data[7:0] = 8'b0000_1111;
+   repeat(2) @(negedge clk_tb); // first cycle cs goes from IDLE to CHK_CMD and the second cycle cs goes from CHK_CMD TO WRITE
 
-          for(j=0;j<=7;j=j+1)begin
-          MOSI_tb = data[7-j];
-          @(negedge clk_tb);
-        end  
-        if(DUT.SPI.rx_data != data[9:0])begin
+   for(i=0;i<10;i=i+1)begin
+      MOSI_tb = data[9-i];
+      @(negedge clk_tb);
+   end
+   SS_n_tb  =1;   /// END COMMUNICATION
+   @(negedge clk_tb);
+   if(DUT.SPI.rx_data != data[9:0])begin
           $display("Error");
           $stop;
-        end
-        SS_n_tb = 1;        // END COMMUNICATION
-         @(negedge clk_tb);
-   end
-   // TEST READ OPERATION
-    flag =2;
-   for(i=0;i<49;i=i+1)begin
-     // START COMMUNICATION 
-        SS_n_tb = 0;
-        MOSI_tb = 1;
-        repeat(2) @(negedge clk_tb);
-        if(flag == 2)begin
-          data[9:8] = 2;
-          flag = 3;
-        end
-        else begin
-           data [9:8] = 3;
-           flag = 2;
-        end
-        for(j=0;j<=1;j=j+1)begin
-          MOSI_tb = data[9-j];
-          @(negedge clk_tb);
-        end
-            data[7:0] = $random;
-          for(j=0;j<=7;j=j+1)begin
-          MOSI_tb = data[7-j];
-          @(negedge clk_tb);
-        end  
-        if(DUT.SPI.tx_data != DUT.ram.RAM[data[9:0]])begin
+    end
+    // WRITE data
+    SS_n_tb = 0; // START COMMUNICATION
+    MOSI_tb = 0;
+    data[9:8] = 2'b01; 
+    data[7:0] = 8'b0101_0011;
+    repeat(2) @(negedge clk_tb); // first cycle cs goes from IDLE to CHK_CMD and the second cycle cs goes from CHK_CMD TO WRITE
+
+    for(i=0;i<10;i=i+1)begin
+       MOSI_tb = data[9-i];
+       @(negedge clk_tb);
+    end
+    SS_n_tb  =1;   /// END COMMUNICATION
+    @(negedge clk_tb);
+    if(DUT.SPI.rx_data != data[9:0])begin
+           $display("Error");
+           $stop;
+    end
+    // READ ADDRESS
+    SS_n_tb = 0; // START COMMUNICATION
+    MOSI_tb = 1;
+    data[9:8] = 2'b10; 
+    data[7:0] = 8'b0000_1111;
+    repeat(2) @(negedge clk_tb); // first cycle cs goes from IDLE to CHK_CMD and the second cycle cs goes from CHK_CMD TO READ_ADD
+
+    for(i=0;i<10;i=i+1)begin 
+       MOSI_tb = data[9-i];
+       @(negedge clk_tb);
+    end
+    SS_n_tb  =1;   /// END COMMUNICATION
+    @(negedge clk_tb);
+    if(DUT.SPI.tx_data != DUT.ram.RAM[data[9:0]])begin
           $display("Error");
           $stop;
-        end
-        SS_n_tb = 1;        // END COMMUNICATION
-         @(negedge clk_tb);
-   end
+    end
+    // READ DATA
+    SS_n_tb = 0; // START COMMUNICATION
+    MOSI_tb = 1;
+    data[9:8] = 2'b11; 
+    data[7:0] = 8'b0000_1111;
+    repeat(2) @(negedge clk_tb); // first cycle cs goes from IDLE to CHK_CMD and the second cycle cs goes from CHK_CMD TO READ_DATA
+
+    for(i=0;i<10;i=i+1)begin
+       MOSI_tb = data[9-i];
+       @(negedge clk_tb);
+    end
+    repeat(9) @(negedge clk_tb);
+    SS_n_tb  =1;   /// END COMMUNICATION
+    @(negedge clk_tb);
+    if(DUT.SPI.tx_data != DUT.ram.RAM[data[9:0]])begin
+          $display("Error");
+          $stop;
+    end
     $stop;
 end
-  
 initial begin
     $monitor("MOSI_tb=%d,SS_n_tb=%d,rst_n_tb=%d,MISO_dut=%d,rx_data=%d,rx_valid=%d,tx_data=%d,tx_valid=%d"
     ,MOSI_tb,SS_n_tb,rst_n_tb,MISO_dut,DUT.rx_valid,DUT.rx_valid, DUT.tx_data,DUT.tx_valid);

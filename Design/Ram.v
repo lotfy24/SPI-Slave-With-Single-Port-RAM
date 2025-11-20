@@ -23,13 +23,23 @@ reg [ADDR_SIZE-1 :0] wr_address , rd_address ;
     else begin
         if(rx_valid)begin
           case (din[9:8])
-            2'b00: wr_address <= din[7:0];
-            2'b01: RAM[wr_address] <= din[7:0];
-            2'b10: rd_address <= din[7:0];
-            2'b11:begin
-                   dout <= RAM[rd_address];
-                   tx_valid <= 1;
+            2'b00:begin
+                  wr_address <= din[7:0];
+                  tx_valid   <= 0;
             end 
+            2'b01:begin
+                  RAM[wr_address] <= din[7:0];
+                  tx_valid        <= 0;
+            end
+            2'b10:begin
+                  rd_address <= din[7:0];
+                  tx_valid   <= 0;
+            end
+            2'b11:begin
+                  dout     <= RAM[rd_address];
+                  tx_valid <= 1;
+            end
+            default: dout <=0;
          endcase
         end     
     end    
